@@ -4,7 +4,7 @@
 
 Originalmente creado para automatizar los mensajes del contestador de un centro educativo durante periodos de vacaciones, su versatilidad lo hace ideal para centralitas, vídeos corporativos, material educativo y cualquier proyecto que requiera una voz profesional en múltiples idiomas.
 
-![VoiceGen Pro Screenshot](https://raw.githubusercontent.com/pfelipm/voicegen/main/voicegenpro.png) *(Nota: Sube una captura de pantalla a tu repo y actualiza este enlace si quieres)*
+![VoiceGen Pro Screenshot](https://raw.githubusercontent.com/pfelipm/voicegen/main/assets/captura-iu-voicegenpro.png)
 
 ## 🚀 Características principales
 
@@ -27,9 +27,10 @@ Para utilizar VoiceGen Pro necesitas:
 
 Este proyecto demuestra cómo crear herramientas funcionales que requieren servicios de IA en entornos sin backend (como GitHub Pages). Al no disponer de persistencia real en estos hospedajes, la app utiliza el almacenamiento local del navegador (`localStorage`) para recordar tus ajustes de forma segura durante la sesión.
 
+## 🤝 Créditos y autoría
+
+Este proyecto ha sido creado y es mantenido por **Pablo Felip** ([LinkedIn](https://www.linkedin.com/in/pfelipm/) | [GitHub](https://github.com/pfelipm)).
+
 ## 📄 Licencia
 
 Este proyecto se distribuye bajo **licencia libre**.
-
----
-Creado por [Pablo Felip Monferrer](https://www.linkedin.com/in/pfelipm/)
