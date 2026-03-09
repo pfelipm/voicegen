@@ -2,7 +2,7 @@
 
 **VoiceGen Pro** es un generador de locuciones profesionales multilingües diseñado para crear mensajes de audio con acentos nativos de forma rápida y sencilla. 
 
-Accede a la aplicación en: 👉 [**voicegenpro.pablofelip.online**](https://voicegenpro.pablofelip.online)
+Accede a la aplicación en: 👉 [**voicegen.pablofelip.online**](https://voicegen.pablofelip.online)
 
 Originalmente creado para automatizar los mensajes del contestador de un centro educativo durante periodos de vacaciones, su versatilidad lo hace ideal para centralitas, vídeos corporativos, material educativo y cualquier proyecto que requiera una voz profesional en múltiples idiomas.
 
