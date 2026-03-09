@@ -31,6 +31,8 @@ Este proyecto demuestra cómo crear herramientas funcionales que requieren servi
 
 A diferencia de otros despliegues similares que suelo realizar en Google Sites, **VoiceGen Pro** se hospeda en **GitHub Pages** para garantizar la persistencia real de los ajustes (clave de API, selección de modelos, etc.) y del historial de audios generados a través de `localStorage`, evitando las restricciones de aislamiento de almacenamiento que imponen los iFrames en Google Sites.
 
+![VoiceGen Pro Settings](https://raw.githubusercontent.com/pfelipm/voicegen/main/assets/captura-ajustes.png)
+
 ## 🤝 Créditos y autoría
 
 Este proyecto ha sido creado y es mantenido por **Pablo Felip** ([LinkedIn](https://www.linkedin.com/in/pfelipm/) | [GitHub](https://github.com/pfelipm)).
