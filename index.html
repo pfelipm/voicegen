@@ -88,7 +88,10 @@
 
         <!-- Panel de configuración -->
         <div id="configPanel" class="hidden glass-panel rounded-2xl p-6 mb-8 shadow-lg border-blue-100 dark:border-blue-900/30">
-            <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4 border-b dark:border-slate-700 pb-2">Configuración</h2>
+            <div class="flex justify-between items-center mb-4 border-b dark:border-slate-700 pb-2">
+                <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-100">Configuración</h2>
+                <div id="configStatus" class="hidden px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider"></div>
+            </div>
             <div class="space-y-6">
                 <!-- Clave de API -->
                 <div>
@@ -344,6 +347,7 @@
         const MODEL_TR_STORAGE = 'voicegen_model_translate';
         const MODEL_TTS_STORAGE = 'voicegen_model_tts';
         const HISTORY_KEY = 'voicegen_history_store';
+        const VALIDATED_STORAGE = 'voicegen_config_validated';
 
         const DEFAULT_MODEL_TR = 'gemini-flash-latest';
         const DEFAULT_MODEL_TTS = 'gemini-2.5-flash-preview-tts';
@@ -387,6 +391,7 @@
             saveBtnLoading: document.getElementById('saveBtnLoading'),
             btnCancelConfig: document.getElementById('btnCancelConfig'),
             btnDeleteConfig: document.getElementById('btnDeleteConfig'),
+            configStatus: document.getElementById('configStatus'),
             locutionText: document.getElementById('locutionText'),
             genderSelect: document.getElementById('genderSelect'),
             toneSelect: document.getElementById('toneSelect'),
@@ -436,9 +441,39 @@
                 dom.customModelTtsInput.classList.remove('hidden');
             }
 
+            updateConfigStatus(safeStorage.get(VALIDATED_STORAGE) || 'none');
             renderHistory();
             validate();
         };
+
+        const updateConfigStatus = (state) => {
+            dom.configStatus.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'dark:bg-green-900/30', 'dark:text-green-400', 'bg-red-100', 'text-red-700', 'dark:bg-red-900/30', 'dark:text-red-400', 'bg-amber-100', 'text-amber-700', 'dark:bg-amber-900/30', 'dark:text-amber-400');
+            
+            if (state === 'verified') {
+                dom.configStatus.innerText = 'Conexión operativa';
+                dom.configStatus.classList.add('bg-green-100', 'text-green-700', 'dark:bg-green-900/30', 'dark:text-green-400');
+            } else if (state === 'error') {
+                dom.configStatus.innerText = 'Error de validación';
+                dom.configStatus.classList.add('bg-red-100', 'text-red-700', 'dark:bg-red-900/30', 'dark:text-red-400');
+            } else if (state === 'pending') {
+                dom.configStatus.innerText = 'Cambios sin verificar';
+                dom.configStatus.classList.add('bg-amber-100', 'text-amber-700', 'dark:bg-amber-900/30', 'dark:text-amber-400');
+            } else {
+                dom.configStatus.classList.add('hidden');
+            }
+            dom.configStatus.classList.toggle('hidden', state === 'none');
+            safeStorage.set(VALIDATED_STORAGE, state);
+        };
+
+        const markAsPending = () => {
+            if (safeStorage.get(VALIDATED_STORAGE) === 'verified') updateConfigStatus('pending');
+        };
+
+        dom.apiKeyInput.oninput = markAsPending;
+        dom.modelTrSelect.onchange = () => { dom.customModelTrInput.classList.toggle('hidden', dom.modelTrSelect.value !== 'custom'); markAsPending(); };
+        dom.customModelTrInput.oninput = markAsPending;
+        dom.modelTtsSelect.onchange = () => { dom.customModelTtsInput.classList.toggle('hidden', dom.modelTtsSelect.value !== 'custom'); markAsPending(); };
+        dom.customModelTtsInput.oninput = markAsPending;
 
         const setTheme = (isDark) => {
             if (isDark) {
@@ -502,6 +537,7 @@
             safeStorage.set(API_STORAGE, apiKeyValue);
             safeStorage.set(MODEL_TR_STORAGE, modelTrValue);
             safeStorage.set(MODEL_TTS_STORAGE, modelTtsValue);
+            updateConfigStatus('none');
 
             dom.configPanel.classList.add('hidden');
             showToast('Ajustes guardados (sin validar).', 'bg-green-600');
@@ -524,6 +560,7 @@
                 await testAPI(tempKey, tempTr, "Translate: Ok.");
                 await testAPI(tempKey, tempTts, "Say: Ok.", true);
 
+                // Solo si el test API tiene éxito, guardamos
                 apiKeyValue = tempKey;
                 modelTrValue = tempTr;
                 modelTtsValue = tempTts;
@@ -531,12 +568,14 @@
                 safeStorage.set(API_STORAGE, apiKeyValue);
                 safeStorage.set(MODEL_TR_STORAGE, modelTrValue);
                 safeStorage.set(MODEL_TTS_STORAGE, modelTtsValue);
+                updateConfigStatus('verified');
 
                 dom.configPanel.classList.add('hidden');
                 showToast('Configuración validada y guardada.', 'bg-green-600');
                 validate();
             } catch (err) {
-                showToast(`Fallo: ${err.message}`, 'bg-red-600');
+                updateConfigStatus('error');
+                showToast(`Fallo de validación: Ajustes no guardados. ${err.message}`, 'bg-red-600');
             } finally {
                 dom.btnSaveConfig.disabled = false;
                 dom.saveBtnText.innerText = 'Validar y guardar ajustes';
