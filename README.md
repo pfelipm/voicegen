@@ -8,11 +8,11 @@ Originalmente creado para automatizar los mensajes del contestador de un centro 
 
 ## 🚀 Características principales
 
-- **Multilingüe y Acentuado:** Traduce y locuta simultáneamente a múltiples idiomas (Español de España, México, Argentina; Inglés de Reino Unido, EE. UU., Australia; Francés, Alemán e Italiano).
-- **Control de Voz:** Selección de sexo del hablante (Femenino/Masculino) y tono (Profesional, Cálido, Neutro, Serio).
-- **Procesamiento de Audio:** Genera un único archivo `.wav` combinando todas las locuciones con pausas personalizables entre idiomas.
-- **Historial Local:** Almacena los últimos 3 audios generados para su rápida reproducción o descarga.
-- **Modo Claro/Oscuro:** Sincronización automática con el sistema operativo y cambio manual.
+- **Multilingüe y acentuado:** Traduce y locuta simultáneamente a múltiples idiomas (español de España, México, Argentina; inglés de Reino Unido, EE. UU., Australia; francés, alemán e italiano).
+- **Control de voz:** Selección de sexo del hablante (femenino/masculino) y tono (profesional, cálido, neutro, serio).
+- **Procesamiento de audio:** Genera un único archivo `.wav` combinando todas las locuciones con pausas personalizables entre idiomas.
+- **Historial local:** Almacena los últimos 3 audios generados para su rápida reproducción o descarga.
+- **Modo claro/oscuro:** Sincronización automática con el sistema operativo y cambio manual.
 - **Resiliencia:** Diseñado con la estrategia "Trae tu propia clave de API" para ser totalmente funcional en hospedajes estáticos como GitHub Pages o Google Sites.
 
 ## 🛠️ Requisitos técnicos
@@ -33,4 +33,4 @@ Este proyecto ha sido creado y es mantenido por **Pablo Felip** ([LinkedIn](http
 
 ## 📄 Licencia
 
-Este proyecto se distribuye bajo **licencia libre**.
+Este proyecto se distribuye bajo los términos del archivo [LICENSE](LICENSE).
