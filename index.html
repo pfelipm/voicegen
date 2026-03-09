@@ -273,9 +273,10 @@
             <div class="space-y-4">
                 <h2 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    Historial local (top 3)
+                    Historial local (últ. 3)
                 </h2>
                 <div id="historyContainer" class="space-y-3">
+
                     <div class="text-center py-8 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-slate-400 dark:text-slate-600 text-[11px] italic">No hay audios guardados</div>
                 </div>
             </div>
@@ -581,15 +582,15 @@
 
             try {
                 const voiceConfig = {
-                    'es-es': { female: 'Aoede', male: 'Kore', label: 'España', prompt: 'Castilian Spanish from Spain' },
-                    'es-mx': { female: 'Algieba', male: 'Orus', label: 'México', prompt: 'Mexican Spanish' },
-                    'es-ar': { female: 'Erinome', male: 'Rasalgethi', label: 'Argentina', prompt: 'Argentinian Spanish' },
-                    'en-gb': { female: 'Charon', male: 'Puck', label: 'Reino Unido', prompt: 'British English' },
-                    'en-us': { female: 'Despina', male: 'Zephyr', label: 'EE. UU.', prompt: 'American English' },
-                    'en-au': { female: 'Algenib', male: 'Achernar', label: 'Australia', prompt: 'Australian English' },
-                    'fr': { female: 'Leda', male: 'Fenrir', label: 'Francia', prompt: 'French' },
-                    'de': { female: 'Schedar', male: 'Gacrux', label: 'Alemania', prompt: 'German' },
-                    'it': { female: 'Pulcherrima', male: 'Achird', label: 'Italia', prompt: 'Italian' }
+                    'es-es': { female: 'Aoede', male: 'Kore', label: 'España', flag: '🇪🇸', prompt: 'Castilian Spanish from Spain' },
+                    'es-mx': { female: 'Algieba', male: 'Orus', label: 'México', flag: '🇲🇽', prompt: 'Mexican Spanish' },
+                    'es-ar': { female: 'Erinome', male: 'Rasalgethi', label: 'Argentina', flag: '🇦🇷', prompt: 'Argentinian Spanish' },
+                    'en-gb': { female: 'Charon', male: 'Puck', label: 'Reino Unido', flag: '🇬🇧', prompt: 'British English' },
+                    'en-us': { female: 'Despina', male: 'Zephyr', label: 'EE. UU.', flag: '🇺🇸', prompt: 'American English' },
+                    'en-au': { female: 'Algenib', male: 'Achernar', label: 'Australia', flag: '🇦🇺', prompt: 'Australian English' },
+                    'fr': { female: 'Leda', male: 'Fenrir', label: 'Francia', flag: '🇫🇷', prompt: 'French' },
+                    'de': { female: 'Schedar', male: 'Gacrux', label: 'Alemania', flag: '🇩🇪', prompt: 'German' },
+                    'it': { female: 'Pulcherrima', male: 'Achird', label: 'Italia', flag: '🇮🇹', prompt: 'Italian' }
                 };
 
                 const tonePrompts = { professional: 'professional and clear', warm: 'warm and friendly', neutral: 'neutral', serious: 'solemn' };
@@ -625,7 +626,7 @@
                     id: Date.now(),
                     text: textInput.substring(0, 30) + (textInput.length > 30 ? '...' : ''),
                     duration: (finalPcm.length / sRate).toFixed(1),
-                    labels: langs.map(l => voiceConfig[l].label).join(', '),
+                    flags: langs.map(l => voiceConfig[l].flag).join(' '),
                     timestamp: new Date().toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }),
                     blob: currentAudioBlob
                 });
@@ -704,7 +705,10 @@
                     <button onclick="deleteHItem(${h.id})" class="delete-btn md:opacity-0 absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-all shadow-md z-10"><svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg></button>
                     <p class="text-[10px] font-bold text-slate-800 dark:text-slate-200 line-clamp-1 italic mb-1">"${h.text}"</p>
                     <div class="flex items-center justify-between mb-2">
-                        <div class="flex gap-1 flex-wrap"><span class="text-[8px] px-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded font-bold uppercase tracking-tighter">${h.labels}</span><span class="text-[8px] px-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded font-bold">${h.duration}s</span></div>
+                        <div class="flex gap-1 flex-wrap">
+                            <span class="text-[10px] filter grayscale-[0.2]">${h.flags || ''}</span>
+                            <span class="text-[8px] px-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded font-bold">${h.duration}s</span>
+                        </div>
                         <span class="text-[8px] text-slate-400 dark:text-slate-500 font-medium">${h.timestamp || ''}</span>
                     </div>
                     <div class="flex gap-1.5 mt-2">
