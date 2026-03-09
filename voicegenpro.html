@@ -250,19 +250,22 @@
                     <div id="btnLoading" class="hidden loading-spinner border-t-white"></div>
                 </button>
 
-                <section id="resultPanel" class="hidden bg-slate-900 dark:bg-black p-6 rounded-2xl shadow-xl text-white animate-in slide-in-from-bottom-4 duration-300">
+                <section id="resultPanel" class="hidden bg-blue-50 dark:bg-slate-900 p-6 rounded-2xl shadow-xl border border-blue-100 dark:border-slate-800 text-slate-900 dark:text-white animate-in slide-in-from-bottom-4 duration-300">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
-                            <span class="bg-blue-500 p-1.5 rounded-lg">
+                            <span class="bg-blue-600 dark:bg-blue-500 p-1.5 rounded-lg text-white">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.983 5.983 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.984 3.984 0 00-1.172-2.828a1 1 0 010-1.415z" clip-rule="evenodd" /></svg>
                             </span>
-                            <h3 class="font-bold">Nueva locución lista</h3>
+                            <h3 class="font-bold text-slate-800 dark:text-white">Nueva locución lista</h3>
                         </div>
-                        <span id="realLength" class="text-xs font-mono bg-white/10 px-2 py-1 rounded">0.0s</span>
+                        <span id="realLength" class="text-xs font-mono bg-blue-100 dark:bg-white/10 px-2 py-1 rounded text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-transparent">0.0s</span>
                     </div>
-                    <audio id="audioPlayer" controls class="w-full h-10 accent-blue-500"></audio>
+                    <audio id="audioPlayer" controls class="w-full h-10 accent-blue-600 dark:accent-blue-500"></audio>
                     <div class="mt-4 flex gap-2">
-                        <button id="downloadBtn" class="flex-1 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-bold text-sm hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Descargar archivo WAV</button>
+                        <button id="downloadBtn" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-lg flex justify-center items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            Descargar archivo WAV
+                        </button>
                     </div>
                 </section>
             </div>
@@ -623,6 +626,7 @@
                     text: textInput.substring(0, 30) + (textInput.length > 30 ? '...' : ''),
                     duration: (finalPcm.length / sRate).toFixed(1),
                     labels: langs.map(l => voiceConfig[l].label).join(', '),
+                    timestamp: new Date().toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }),
                     blob: currentAudioBlob
                 });
 
@@ -696,13 +700,16 @@
             if (!dom.historyContainer) return;
             if (historyStore.length === 0) { dom.historyContainer.innerHTML = '<div class="text-center py-8 text-slate-400 text-[11px] italic">No hay audios guardados</div>'; return; }
             dom.historyContainer.innerHTML = historyStore.map(h => `
-                <div class="history-card bg-white p-3 rounded-xl border border-slate-200 shadow-sm relative group animate-in fade-in">
-                    <button onclick="deleteHItem(${h.id})" class="delete-btn opacity-0 absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-all shadow-md"><svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg></button>
-                    <p class="text-[10px] font-bold text-slate-800 line-clamp-1 italic">"${h.text}"</p>
-                    <div class="flex gap-1 mt-1"><span class="text-[8px] px-1 bg-slate-100 text-slate-500 rounded font-bold">${h.labels}</span><span class="text-[8px] px-1 bg-blue-50 text-blue-600 rounded font-bold">${h.duration}s</span></div>
+                <div class="history-card bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm relative group animate-in fade-in">
+                    <button onclick="deleteHItem(${h.id})" class="delete-btn md:opacity-0 absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-all shadow-md z-10"><svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg></button>
+                    <p class="text-[10px] font-bold text-slate-800 dark:text-slate-200 line-clamp-1 italic mb-1">"${h.text}"</p>
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex gap-1 flex-wrap"><span class="text-[8px] px-1 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded font-bold uppercase tracking-tighter">${h.labels}</span><span class="text-[8px] px-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded font-bold">${h.duration}s</span></div>
+                        <span class="text-[8px] text-slate-400 dark:text-slate-500 font-medium">${h.timestamp || ''}</span>
+                    </div>
                     <div class="flex gap-1.5 mt-2">
-                        <button onclick="playHItem(${h.id})" class="flex-1 py-1 bg-slate-100 hover:bg-blue-600 hover:text-white rounded-lg text-[9px] font-bold transition-all uppercase">Reproducir</button>
-                        <button onclick="dlHItem(${h.id})" class="p-1.5 bg-slate-50 text-slate-400 rounded-lg hover:bg-slate-200 transition-colors"><svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg></button>
+                        <button onclick="playHItem(${h.id})" class="flex-1 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white dark:hover:text-white rounded-lg text-[9px] font-bold transition-all uppercase">Reproducir</button>
+                        <button onclick="dlHItem(${h.id})" class="p-1.5 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"><svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg></button>
                     </div>
                 </div>`).join('');
         }
