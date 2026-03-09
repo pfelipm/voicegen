@@ -446,7 +446,7 @@
             validate();
         };
 
-        const updateConfigStatus = (state) => {
+        const updateConfigStatus = (state, persist = false) => {
             dom.configStatus.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'dark:bg-green-900/30', 'dark:text-green-400', 'bg-red-100', 'text-red-700', 'dark:bg-red-900/30', 'dark:text-red-400', 'bg-amber-100', 'text-amber-700', 'dark:bg-amber-900/30', 'dark:text-amber-400');
             
             if (state === 'verified') {
@@ -462,17 +462,23 @@
                 dom.configStatus.classList.add('hidden');
             }
             dom.configStatus.classList.toggle('hidden', state === 'none');
-            safeStorage.set(VALIDATED_STORAGE, state);
+            if (persist) safeStorage.set(VALIDATED_STORAGE, state);
         };
 
         const markAsPending = () => {
-            if (safeStorage.get(VALIDATED_STORAGE) === 'verified') updateConfigStatus('pending');
+            updateConfigStatus('pending', false); // Cambio visual solamente
         };
 
         dom.apiKeyInput.oninput = markAsPending;
-        dom.modelTrSelect.onchange = () => { dom.customModelTrInput.classList.toggle('hidden', dom.modelTrSelect.value !== 'custom'); markAsPending(); };
+        dom.modelTrSelect.onchange = () => { 
+            dom.customModelTrInput.classList.toggle('hidden', dom.modelTrSelect.value !== 'custom'); 
+            markAsPending(); 
+        };
         dom.customModelTrInput.oninput = markAsPending;
-        dom.modelTtsSelect.onchange = () => { dom.customModelTtsInput.classList.toggle('hidden', dom.modelTtsSelect.value !== 'custom'); markAsPending(); };
+        dom.modelTtsSelect.onchange = () => { 
+            dom.customModelTtsInput.classList.toggle('hidden', dom.modelTtsSelect.value !== 'custom'); 
+            markAsPending(); 
+        };
         dom.customModelTtsInput.oninput = markAsPending;
 
         const setTheme = (isDark) => {
@@ -511,9 +517,34 @@
 
         // --- Ajustes ---
 
-        dom.btnSettings.onclick = () => dom.configPanel.classList.toggle('hidden');
-        dom.modelTrSelect.onchange = () => dom.customModelTrInput.classList.toggle('hidden', dom.modelTrSelect.value !== 'custom');
-        dom.modelTtsSelect.onchange = () => dom.customModelTtsInput.classList.toggle('hidden', dom.modelTtsSelect.value !== 'custom');
+        dom.btnSettings.onclick = () => {
+            if (dom.configPanel.classList.contains('hidden')) {
+                // Sincronizar campos con valores reales antes de mostrar
+                dom.apiKeyInput.value = apiKeyValue;
+                
+                if (['gemini-flash-latest', 'gemini-flash-lite-latest'].includes(modelTrValue)) {
+                    dom.modelTrSelect.value = modelTrValue;
+                    dom.customModelTrInput.classList.add('hidden');
+                } else {
+                    dom.modelTrSelect.value = 'custom';
+                    dom.customModelTrInput.value = modelTrValue;
+                    dom.customModelTrInput.classList.remove('hidden');
+                }
+
+                if (['gemini-2.5-flash-preview-tts', 'gemini-2.5-pro-preview-tts'].includes(modelTtsValue)) {
+                    dom.modelTtsSelect.value = modelTtsValue;
+                    dom.customModelTtsInput.classList.add('hidden');
+                } else {
+                    dom.modelTtsSelect.value = 'custom';
+                    dom.customModelTtsInput.value = modelTtsValue;
+                    dom.customModelTtsInput.classList.remove('hidden');
+                }
+
+                // Restaurar estado visual correcto
+                updateConfigStatus(safeStorage.get(VALIDATED_STORAGE) || 'none');
+            }
+            dom.configPanel.classList.toggle('hidden');
+        };
 
         dom.btnResetAll.onclick = () => {
             dom.modelTrSelect.value = DEFAULT_MODEL_TR;
@@ -537,7 +568,7 @@
             safeStorage.set(API_STORAGE, apiKeyValue);
             safeStorage.set(MODEL_TR_STORAGE, modelTrValue);
             safeStorage.set(MODEL_TTS_STORAGE, modelTtsValue);
-            updateConfigStatus('none');
+            updateConfigStatus('pending', true);
 
             dom.configPanel.classList.add('hidden');
             showToast('Ajustes guardados (sin validar).', 'bg-green-600');
@@ -568,13 +599,13 @@
                 safeStorage.set(API_STORAGE, apiKeyValue);
                 safeStorage.set(MODEL_TR_STORAGE, modelTrValue);
                 safeStorage.set(MODEL_TTS_STORAGE, modelTtsValue);
-                updateConfigStatus('verified');
+                updateConfigStatus('verified', true);
 
                 dom.configPanel.classList.add('hidden');
                 showToast('Configuración validada y guardada.', 'bg-green-600');
                 validate();
             } catch (err) {
-                updateConfigStatus('error');
+                updateConfigStatus('error', true);
                 showToast(`Fallo de validación: Ajustes no guardados. ${err.message}`, 'bg-red-600');
             } finally {
                 dom.btnSaveConfig.disabled = false;
