@@ -45,11 +45,13 @@
         /* Toast interactivo */
         #alertBox { cursor: pointer; pointer-events: auto !important; }
         
-        /* Custom scrollbar para lista de idiomas */
-        #langList::-webkit-scrollbar { width: 4px; }
-        #langList::-webkit-scrollbar-track { background: transparent; }
-        #langList::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .dark #langList::-webkit-scrollbar-thumb { background: #475569; }
+        /* Audio Player Styling */
+        #audioPlayer {
+            filter: sepia(20%) saturate(70%) brightness(95%) contrast(90%);
+        }
+        .dark #audioPlayer {
+            filter: invert(100%) hue-rotate(180deg) brightness(1.2) contrast(85%);
+        }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen p-4 md:p-8 transition-colors duration-300">
