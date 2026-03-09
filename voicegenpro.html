@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceGen Pro - Centralita multilingüe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
+        
+        /* Glass Panels */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass-panel {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .loading-spinner {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid #3b82f6;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        .dark .loading-spinner { border-color: rgba(255, 255, 255, 0.1); border-top-color: #60a5fa; }
+        
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        input[type="checkbox"]:disabled + span { color: #cbd5e1; }
+        .dark input[type="checkbox"]:disabled + span { color: #475569; }
+        
+        .history-card:hover .delete-btn { opacity: 1; }
+
+        /* Toast interactivo */
+        #alertBox { cursor: pointer; pointer-events: auto !important; }
+        
+        /* Custom scrollbar para lista de idiomas */
+        #langList::-webkit-scrollbar { width: 4px; }
+        #langList::-webkit-scrollbar-track { background: transparent; }
+        #langList::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark #langList::-webkit-scrollbar-thumb { background: #475569; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen p-4 md:p-8 transition-colors duration-300">
+
+    <div class="max-w-5xl mx-auto">
+        <!-- Cabecera -->
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">VoiceGen <span class="text-blue-600 dark:text-blue-400">Pro</span></h1>
+                <p class="text-sm text-slate-500 dark:text-slate-400 italic">Locuciones profesionales con acentos nativos</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="flex gap-2 mr-4 border-r dark:border-slate-700 pr-4">
+                    <button id="themeToggle" class="p-2 bg-white dark:bg-slate-800 rounded-full shadow-sm hover:shadow-md transition-all border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
+                        <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                    </button>
+                    <button id="btnSettings" class="p-2 bg-white dark:bg-slate-800 rounded-full shadow-sm hover:shadow-md transition-all border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </button>
+                </div>
+                <button id="btnInfo" class="p-2 bg-white dark:bg-slate-800 rounded-full shadow-sm hover:shadow-md transition-all border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Panel de configuración -->
+        <div id="configPanel" class="hidden glass-panel rounded-2xl p-6 mb-8 shadow-lg border-blue-100 dark:border-blue-900/30">
+            <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4 border-b dark:border-slate-700 pb-2">Configuración</h2>
+            <div class="space-y-6">
+                <!-- Clave de API -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1 font-bold">Clave de la API de Gemini</label>
+                    <input type="password" id="apiKeyInput" placeholder="Pega tu clave de la API de Gemini aquí..." class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Modelo de Traducción -->
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-tighter text-[11px] mb-2">Modelo para Traducción (Texto)</label>
+                        <select id="modelTranslateSelect" class="w-full px-3 py-2 bg-white dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-600 outline-none text-sm mb-2 text-slate-900 dark:text-white">
+                            <option value="gemini-flash-latest">Gemini Flash Latest (Recomendado)</option>
+                            <option value="gemini-flash-lite-latest">Gemini Flash Lite Latest</option>
+                            <option value="custom">-- Otro modelo --</option>
+                        </select>
+                        <input type="text" id="customModelTranslateInput" placeholder="Nombre del modelo de texto..." class="hidden w-full px-3 py-2 bg-white dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-600 outline-none text-sm text-slate-900 dark:text-white">
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 italic mt-1">Se usa para traducir el mensaje a otros idiomas.</p>
+                    </div>
+
+                    <!-- Modelo de TTS -->
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-tighter text-[11px] mb-2">Modelo para Locución (Audio)</label>
+                        <select id="modelTTSSelect" class="w-full px-3 py-2 bg-white dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-600 outline-none text-sm mb-2 text-slate-900 dark:text-white">
+                            <option value="gemini-2.5-flash-preview-tts">Gemini 2.5 Flash Preview TTS (Rápido)</option>
+                            <option value="gemini-2.5-pro-preview-tts">Gemini 2.5 Pro Preview TTS (Calidad)</option>
+                            <option value="custom">-- Otro modelo --</option>
+                        </select>
+                        <input type="text" id="customModelTTSInput" placeholder="Nombre del modelo TTS..." class="hidden w-full px-3 py-2 bg-white dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-600 outline-none text-sm text-slate-900 dark:text-white">
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 italic mt-1">Convierte el texto final en audio nativo.</p>
+                    </div>
+                </div>
+
+                <div class="p-5 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-900/30 text-sm text-blue-900 dark:text-blue-200 shadow-inner">
+                    <p class="font-bold mb-3 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
+                        Instrucciones para obtener la clave:
+                    </p>
+                    <ol class="list-decimal ml-5 space-y-2 leading-relaxed">
+                        <li>Accede a <a href="https://aistudio.google.com/" target="_blank" class="underline font-bold hover:text-blue-700 dark:hover:text-blue-400 transition-colors">Google AI Studio</a> con tu cuenta de Google.</li>
+                        <li>Haz clic en el botón <strong>"Get API key"</strong> en el menú lateral izquierdo.</li>
+                        <li>Clica en <strong>"Crear clave de API"</strong>.</li>
+                        <li>Copia la clave generada y pégala en el campo de arriba.</li>
+                        <li class="italic text-blue-700 dark:text-blue-400 font-medium">La clave se utiliza únicamente en tu navegador para realizar las peticiones a Google.</li>
+                    </ol>
+                </div>
+
+                <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                   <p class="text-xs text-slate-600 dark:text-slate-400 italic">Puedes guardar directamente o probar la conexión antes de guardar.</p>
+                   <button id="btnResetAll" class="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline uppercase">Restablecer valores flash</button>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2 border-t border-slate-100 dark:border-slate-700 flex-wrap">
+                    <button id="btnDeleteConfig" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 transition-colors font-medium text-xs">Eliminar ajustes locales</button>
+                    <button id="btnSaveConfig" class="px-4 py-2 border border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors font-bold text-sm flex items-center gap-2">
+                        <span id="saveBtnText">Validar y guardar</span>
+                        <div id="saveBtnLoading" class="hidden loading-spinner border-t-blue-600 w-4 h-4"></div>
+                    </button>
+                    <button id="btnSaveNoValidate" class="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-bold text-sm shadow-md">
+                        Guardar ajustes
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-4 gap-8">
+            <div class="lg:col-span-3 space-y-6">
+                <!-- Entrada de texto -->
+                <section class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 italic">Contenido de la locución</label>
+                    <textarea id="locutionText" rows="4" class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none resize-none" placeholder="Escribe el mensaje que se generará..."></textarea>
+                    <div class="flex justify-between mt-2 text-[10px] uppercase font-bold tracking-widest text-slate-400 dark:text-slate-500">
+                        <span id="charCount">0 caracteres</span>
+                        <span id="estLength" class="text-blue-500 dark:text-blue-400">Estimación: 0s</span>
+                    </div>
+                </section>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <section class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 space-y-5">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">Sexo del hablante</label>
+                            <select id="genderSelect" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 outline-none text-sm font-medium text-slate-900 dark:text-white">
+                                <option value="female">Femenino</option>
+                                <option value="male">Masculino</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">Tono</label>
+                            <select id="toneSelect" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 outline-none text-sm font-medium text-slate-900 dark:text-white">
+                                <option value="professional">Profesional corporativo</option>
+                                <option value="warm">Cálido y cercano</option>
+                                <option value="neutral">Informativo neutro</option>
+                                <option value="serious">Solemne y serio</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">Pausa entre idiomas</label>
+                            <select id="pauseSelect" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 outline-none text-sm font-medium text-slate-900 dark:text-white">
+                                <option value="1">1 segundo</option>
+                                <option value="2">2 segundos</option>
+                                <option value="3">3 segundos</option>
+                            </select>
+                        </div>
+                    </section>
+
+                    <section class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">Idiomas / acentos (selección múltiple)</label>
+                        <div id="langList" class="space-y-1 overflow-y-auto max-h-[220px] pr-2">
+                            <div class="text-[9px] font-bold text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">Español</div>
+                            <label class="flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
+                                <input type="checkbox" value="es-es" checked class="w-4 h-4 text-blue-600 rounded dark:bg-slate-700 dark:border-slate-600">
+                                <span class="text-xs text-slate-700 dark:text-slate-300">🇪🇸 España</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
+                                <input type="checkbox" value="es-mx" class="w-4 h-4 text-blue-600 rounded dark:bg-slate-700 dark:border-slate-600">
+                                <span class="text-xs text-slate-700 dark:text-slate-300">🇲🇽 México</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
+                                <input type="checkbox" value="es-ar" class="w-4 h-4 text-blue-600 rounded dark:bg-slate-700 dark:border-slate-600">
+                                <span class="text-xs text-slate-700 dark:text-slate-300">🇦🇷 Argentina</span>
+                            </label>
+
+                            <div class="text-[9px] font-bold text-slate-500 dark:text-slate-400 mt-3 mb-1 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">Inglés</div>
+                            <label class="flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
+                                <input type="checkbox" value="en-gb" class="w-4 h-4 text-blue-600 rounded dark:bg-slate-700 dark:border-slate-600">
+                                <span class="text-xs text-slate-700 dark:text-slate-300">🇬🇧 Reino Unido</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
+                                <input type="checkbox" value="en-us" class="w-4 h-4 text-blue-600 rounded dark:bg-slate-700 dark:border-slate-600">
+                                <span class="text-xs text-slate-700 dark:text-slate-300">🇺🇸 Estados Unidos</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
+                                <input type="checkbox" value="en-au" class="w-4 h-4 text-blue-600 rounded dark:bg-slate-700 dark:border-slate-600">
+                                <span class="text-xs text-slate-700 dark:text-slate-300">🇦🇺 Australia</span>
+                            </label>
+
+                            <div class="text-[9px] font-bold text-slate-500 dark:text-slate-400 mt-3 mb-1 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">Otros</div>
+                            <label class="flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
+                                <input type="checkbox" value="fr" class="w-4 h-4 text-blue-600 rounded dark:bg-slate-700 dark:border-slate-600">
+                                <span class="text-xs text-slate-700 dark:text-slate-300">🇫🇷 Francés</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
+                                <input type="checkbox" value="de" class="w-4 h-4 text-blue-600 rounded dark:bg-slate-700 dark:border-slate-600">
+                                <span class="text-xs text-slate-700 dark:text-slate-300">🇩🇪 Alemán</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer">
+                                <input type="checkbox" value="it" class="w-4 h-4 text-blue-600 rounded dark:bg-slate-700 dark:border-slate-600">
+                                <span class="text-xs text-slate-700 dark:text-slate-300">🇮🇹 Italiano</span>
+                            </label>
+                        </div>
+                    </section>
+                </div>
+
+                <button id="generateBtn" disabled class="w-full py-4 bg-blue-600 dark:bg-blue-500 text-white rounded-2xl font-bold shadow-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-all flex justify-center items-center gap-3 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-600 disabled:cursor-not-allowed">
+                    <span id="btnText">Generar locución</span>
+                    <div id="btnLoading" class="hidden loading-spinner border-t-white"></div>
+                </button>
+
+                <section id="resultPanel" class="hidden bg-slate-900 dark:bg-black p-6 rounded-2xl shadow-xl text-white animate-in slide-in-from-bottom-4 duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-blue-500 p-1.5 rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.983 5.983 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.984 3.984 0 00-1.172-2.828a1 1 0 010-1.415z" clip-rule="evenodd" /></svg>
+                            </span>
+                            <h3 class="font-bold">Nueva locución lista</h3>
+                        </div>
+                        <span id="realLength" class="text-xs font-mono bg-white/10 px-2 py-1 rounded">0.0s</span>
+                    </div>
+                    <audio id="audioPlayer" controls class="w-full h-10 accent-blue-500"></audio>
+                    <div class="mt-4 flex gap-2">
+                        <button id="downloadBtn" class="flex-1 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-bold text-sm hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Descargar archivo WAV</button>
+                    </div>
+                </section>
+            </div>
+
+            <div class="space-y-4">
+                <h2 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Historial local (top 3)
+                </h2>
+                <div id="historyContainer" class="space-y-3">
+                    <div class="text-center py-8 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-slate-400 dark:text-slate-600 text-[11px] italic">No hay audios guardados</div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-12 py-6 border-t border-slate-200 dark:border-slate-800 text-center text-slate-400 dark:text-slate-600 text-[10px] uppercase tracking-widest">
+            VOICEGEN PRO &middot; V1.0
+        </footer>
+    </div>
+
+    <!-- Modal de Atribución -->
+    <div id="infoModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4 transition-all duration-300">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div class="p-8">
+                <div class="flex flex-col md:flex-row gap-8 items-center md:items-start">
+                    <img src="https://drive.google.com/thumbnail?id=1pbNyTrnZeZvfWLu2Lm66f9tVQ3OqTKHx&sz=w500-h500" alt="Pablo Felip" class="w-28 h-28 rounded-full border-4 border-white dark:border-gray-700 shadow-xl object-cover bg-gray-100">
+                    <div class="flex-1 text-center md:text-left">
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-3 tracking-tight uppercase">VoiceGen Pro</h3>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4">
+                            Generador de locuciones profesionales multilingües diseñado originalmente para automatizar los mensajes del contestador de un centro educativo durante periodos de vacaciones.
+                        </p>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4">
+                            Utiliza la potencia de <strong>Google Gemini</strong> para traducción y síntesis de voz con acentos nativos. Ten en cuenta que el nivel gratuito de la API (sin facturación activada) tiene límites de uso diarios bastante severos.
+                        </p>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4">
+                            Requiere una clave de API propia y un proyecto de Google Cloud asociado; la app guía para su obtención en <a href="https://ai.dev" target="_blank" class="text-blue-600 dark:text-blue-400 underline transition-colors">Google AI Studio</a>.
+                        </p>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4">
+                            Demuestra la estrategia <strong>"Trae tu propia clave de API"</strong>, permitiendo que sea funcional al insertarse en hospedajes sin backend como Google Sites o GitHub Pages, que carecen de persistencia real.
+                        </p>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-5">
+                            Creado por <a href="https://www.linkedin.com/in/pfelipm/" target="_blank" class="text-blue-600 dark:text-blue-400 font-bold hover:underline transition-all">Pablo Felip Monferrer</a> y distribuido bajo licencia libre.
+                        </p>
+                        <p class="text-slate-500 dark:text-slate-500 text-xs italic border-t dark:border-slate-800 pt-4">
+                            Apta para centralitas, vídeos corporativos y material educativo.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-slate-50 dark:bg-slate-800/50 p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex gap-4">
+                    <a href="https://www.linkedin.com/in/pfelipm/" target="_blank" class="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all hover:scale-105 flex items-center gap-2 text-sm font-semibold">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                        LinkedIn
+                    </a>
+                    <a href="https://github.com/pfelipm/voicegen" target="_blank" class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all hover:scale-105 flex items-center gap-2 text-sm font-semibold">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                        GitHub
+                    </a>
+                </div>
+                <button id="closeInfo" class="px-5 py-2 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold text-sm hover:scale-105 transition-all">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertas emergentes -->
+    <div id="alertBox" class="fixed bottom-4 right-4 max-w-sm w-full bg-slate-800 text-white p-4 rounded-xl shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <p id="alertMsg" class="text-sm font-medium"></p>
+    </div>
+
+    <script>
+        const API_STORAGE = 'voicegen_gemini_key';
+        const MODEL_TR_STORAGE = 'voicegen_model_translate';
+        const MODEL_TTS_STORAGE = 'voicegen_model_tts';
+        const HISTORY_KEY = 'voicegen_history_store';
+
+        const DEFAULT_MODEL_TR = 'gemini-flash-latest';
+        const DEFAULT_MODEL_TTS = 'gemini-2.5-flash-preview-tts';
+
+        // Gestión segura de LocalStorage
+        const safeStorage = {
+            get: (key) => { try { return localStorage.getItem(key); } catch(e) { return null; } },
+            set: (key, val) => { try { localStorage.setItem(key, val); return true; } catch(e) { return false; } },
+            clear: () => { try { localStorage.clear(); return true; } catch(e) { return false; } }
+        };
+
+        let apiKeyValue = safeStorage.get(API_STORAGE) || '';
+        let modelTrValue = safeStorage.get(MODEL_TR_STORAGE) || DEFAULT_MODEL_TR;
+        let modelTtsValue = safeStorage.get(MODEL_TTS_STORAGE) || DEFAULT_MODEL_TTS;
+
+        let currentAudioBlob = null;
+        let historyStore = [];
+        try {
+            historyStore = JSON.parse(safeStorage.get(HISTORY_KEY) || '[]');
+        } catch(e) { historyStore = []; }
+        let alertTimeout = null;
+
+        const dom = {
+            btnSettings: document.getElementById('btnSettings'),
+            themeToggle: document.getElementById('themeToggle'),
+            sunIcon: document.getElementById('sunIcon'),
+            moonIcon: document.getElementById('moonIcon'),
+            btnInfo: document.getElementById('btnInfo'),
+            infoModal: document.getElementById('infoModal'),
+            closeInfo: document.getElementById('closeInfo'),
+            configPanel: document.getElementById('configPanel'),
+            apiKeyInput: document.getElementById('apiKeyInput'),
+            modelTrSelect: document.getElementById('modelTranslateSelect'),
+            customModelTrInput: document.getElementById('customModelTranslateInput'),
+            modelTtsSelect: document.getElementById('modelTTSSelect'),
+            customModelTtsInput: document.getElementById('customModelTTSInput'),
+            btnResetAll: document.getElementById('btnResetAll'),
+            btnSaveConfig: document.getElementById('btnSaveConfig'),
+            btnSaveNoValidate: document.getElementById('btnSaveNoValidate'),
+            saveBtnText: document.getElementById('saveBtnText'),
+            saveBtnLoading: document.getElementById('saveBtnLoading'),
+            btnDeleteConfig: document.getElementById('btnDeleteConfig'),
+            locutionText: document.getElementById('locutionText'),
+            genderSelect: document.getElementById('genderSelect'),
+            toneSelect: document.getElementById('toneSelect'),
+            charCount: document.getElementById('charCount'),
+            estLength: document.getElementById('estLength'),
+            generateBtn: document.getElementById('generateBtn'),
+            btnLoading: document.getElementById('btnLoading'),
+            btnText: document.getElementById('btnText'),
+            resultPanel: document.getElementById('resultPanel'),
+            audioPlayer: document.getElementById('audioPlayer'),
+            realLength: document.getElementById('realLength'),
+            downloadBtn: document.getElementById('downloadBtn'),
+            langList: document.getElementById('langList'),
+            pauseSelect: document.getElementById('pauseSelect'),
+            historyContainer: document.getElementById('historyContainer'),
+            alertBox: document.getElementById('alertBox'),
+            alertMsg: document.getElementById('alertMsg')
+        };
+
+        // --- Inicialización ---
+
+        const initUI = () => {
+            if (!dom.apiKeyInput) return;
+            dom.apiKeyInput.value = apiKeyValue;
+
+            // Tema inicial (siempre sigue al sistema al cargar)
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            setTheme(systemDark);
+
+            // Escuchar cambios en el sistema en tiempo real
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => setTheme(e.matches));
+
+            // Sync models selects
+            if (['gemini-flash-latest', 'gemini-flash-lite-latest'].includes(modelTrValue)) {
+                dom.modelTrSelect.value = modelTrValue;
+            } else {
+                dom.modelTrSelect.value = 'custom';
+                dom.customModelTrInput.value = modelTrValue;
+                dom.customModelTrInput.classList.remove('hidden');
+            }
+
+            if (['gemini-2.5-flash-preview-tts', 'gemini-2.5-pro-preview-tts'].includes(modelTtsValue)) {
+                dom.modelTtsSelect.value = modelTtsValue;
+            } else {
+                dom.modelTtsSelect.value = 'custom';
+                dom.customModelTtsInput.value = modelTtsValue;
+                dom.customModelTtsInput.classList.remove('hidden');
+            }
+
+            renderHistory();
+            validate();
+        };
+
+        const setTheme = (isDark) => {
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                dom.sunIcon.classList.remove('hidden');
+                dom.moonIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                dom.sunIcon.classList.add('hidden');
+                dom.moonIcon.classList.remove('hidden');
+            }
+        };
+
+        dom.themeToggle.onclick = () => setTheme(!document.documentElement.classList.contains('dark'));
+        
+        // Modal Info
+        dom.btnInfo.onclick = () => dom.infoModal.classList.remove('hidden');
+        dom.closeInfo.onclick = () => dom.infoModal.classList.add('hidden');
+        dom.infoModal.onclick = (e) => { if (e.target === dom.infoModal) dom.infoModal.classList.add('hidden'); };
+
+        const validate = () => {
+            const hasText = dom.locutionText.value.trim().length > 0;
+            const hasLangs = Array.from(dom.langList.querySelectorAll('input:checked')).length > 0;
+            dom.generateBtn.disabled = !(hasText && hasLangs);
+
+            if (hasText) {
+                const words = dom.locutionText.value.trim().split(/\s+/).length;
+                const langCount = Array.from(dom.langList.querySelectorAll('input:checked')).length;
+                const pVal = parseInt(dom.pauseSelect.value);
+                const est = (words / 2.5) * langCount + (langCount > 1 ? (langCount - 1) * pVal : 0);
+                dom.estLength.innerText = `Estimación: ${est.toFixed(1)}s`;
+                dom.charCount.innerText = `${dom.locutionText.value.length} caracteres`;
+            }
+        };
+
+        // --- Ajustes ---
+
+        dom.btnSettings.onclick = () => dom.configPanel.classList.toggle('hidden');
+        dom.modelTrSelect.onchange = () => dom.customModelTrInput.classList.toggle('hidden', dom.modelTrSelect.value !== 'custom');
+        dom.modelTtsSelect.onchange = () => dom.customModelTtsInput.classList.toggle('hidden', dom.modelTtsSelect.value !== 'custom');
+
+        dom.btnResetAll.onclick = () => {
+            dom.modelTrSelect.value = DEFAULT_MODEL_TR;
+            dom.modelTtsSelect.value = DEFAULT_MODEL_TTS;
+            dom.customModelTrInput.classList.add('hidden');
+            dom.customModelTtsInput.classList.add('hidden');
+            showToast('Valores restablecidos. Pulsa Guardar.');
+        };
+
+        dom.btnSaveNoValidate.onclick = () => {
+            const tempKey = dom.apiKeyInput.value.trim();
+            const tempTr = dom.modelTrSelect.value === 'custom' ? dom.customModelTrInput.value.trim() : dom.modelTrSelect.value;
+            const tempTts = dom.modelTtsSelect.value === 'custom' ? dom.customModelTtsInput.value.trim() : dom.modelTtsSelect.value;
+
+            if (!tempKey || !tempTr || !tempTts) return showToast('Completa todos los campos.', 'bg-amber-600');
+
+            apiKeyValue = tempKey;
+            modelTrValue = tempTr;
+            modelTtsValue = tempTts;
+
+            safeStorage.set(API_STORAGE, apiKeyValue);
+            safeStorage.set(MODEL_TR_STORAGE, modelTrValue);
+            safeStorage.set(MODEL_TTS_STORAGE, modelTtsValue);
+
+            dom.configPanel.classList.add('hidden');
+            showToast('Ajustes guardados (sin validar).', 'bg-green-600');
+            validate();
+        };
+
+        dom.btnSaveConfig.onclick = async () => {
+            const tempKey = dom.apiKeyInput.value.trim();
+            const tempTr = dom.modelTrSelect.value === 'custom' ? dom.customModelTrInput.value.trim() : dom.modelTrSelect.value;
+            const tempTts = dom.modelTtsSelect.value === 'custom' ? dom.customModelTtsInput.value.trim() : dom.modelTtsSelect.value;
+
+            if (!tempKey || !tempTr || !tempTts) return showToast('Completa todos los campos.', 'bg-amber-600');
+
+            dom.btnSaveConfig.disabled = true;
+            dom.saveBtnText.innerText = 'Validando...';
+            dom.saveBtnLoading.classList.remove('hidden');
+
+            try {
+                // Test models
+                await testAPI(tempKey, tempTr, "Translate: Ok.");
+                await testAPI(tempKey, tempTts, "Say: Ok.", true);
+
+                apiKeyValue = tempKey;
+                modelTrValue = tempTr;
+                modelTtsValue = tempTts;
+
+                safeStorage.set(API_STORAGE, apiKeyValue);
+                safeStorage.set(MODEL_TR_STORAGE, modelTrValue);
+                safeStorage.set(MODEL_TTS_STORAGE, modelTtsValue);
+
+                dom.configPanel.classList.add('hidden');
+                showToast('Configuración validada y guardada.', 'bg-green-600');
+                validate();
+            } catch (err) {
+                showToast(`Fallo: ${err.message}`, 'bg-red-600');
+            } finally {
+                dom.btnSaveConfig.disabled = false;
+                dom.saveBtnText.innerText = 'Validar y guardar ajustes';
+                dom.saveBtnLoading.classList.add('hidden');
+            }
+        };
+
+        async function testAPI(key, model, text, isAudio = false) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+            const payload = {
+                contents: [{ parts: [{ text: text }] }]
+            };
+
+            if (isAudio) {
+                payload.generationConfig = {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } } }
+                };
+            }
+
+            const resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!resp.ok) {
+                const errorData = await resp.json();
+                throw new Error(`${model}: ${errorData.error?.message || 'Error'}`);
+            }
+        }
+
+        // --- Generación ---
+
+        dom.generateBtn.onclick = async () => {
+            if (!apiKeyValue) return dom.configPanel.classList.remove('hidden');
+
+            dom.generateBtn.disabled = true;
+            dom.btnLoading.classList.remove('hidden');
+            dom.btnText.innerText = 'Procesando...';
+            dom.resultPanel.classList.add('hidden');
+
+            const textInput = dom.locutionText.value.trim();
+            const langs = Array.from(dom.langList.querySelectorAll('input:checked')).map(i => i.value);
+            const gender = dom.genderSelect.value;
+            const tone = dom.toneSelect.value;
+            const pauseTime = parseInt(dom.pauseSelect.value);
+
+            try {
+                const voiceConfig = {
+                    'es-es': { female: 'Aoede', male: 'Kore', label: 'España', prompt: 'Castilian Spanish from Spain' },
+                    'es-mx': { female: 'Algieba', male: 'Orus', label: 'México', prompt: 'Mexican Spanish' },
+                    'es-ar': { female: 'Erinome', male: 'Rasalgethi', label: 'Argentina', prompt: 'Argentinian Spanish' },
+                    'en-gb': { female: 'Charon', male: 'Puck', label: 'Reino Unido', prompt: 'British English' },
+                    'en-us': { female: 'Despina', male: 'Zephyr', label: 'EE. UU.', prompt: 'American English' },
+                    'en-au': { female: 'Algenib', male: 'Achernar', label: 'Australia', prompt: 'Australian English' },
+                    'fr': { female: 'Leda', male: 'Fenrir', label: 'Francia', prompt: 'French' },
+                    'de': { female: 'Schedar', male: 'Gacrux', label: 'Alemania', prompt: 'German' },
+                    'it': { female: 'Pulcherrima', male: 'Achird', label: 'Italia', prompt: 'Italian' }
+                };
+
+                const tonePrompts = { professional: 'professional and clear', warm: 'warm and friendly', neutral: 'neutral', serious: 'solemn' };
+
+                let allBuffers = [];
+                let sRate = 24000;
+
+                for (let i = 0; i < langs.length; i++) {
+                    const cfg = voiceConfig[langs[i]];
+                    const voice = cfg[gender];
+
+                    dom.btnText.innerText = `Traduciendo (${cfg.label})...`;
+                    const translated = await translate(textInput, cfg.prompt);
+
+                    dom.btnText.innerText = `Locutando (${cfg.label})...`;
+                    const audio = await tts(`Say in ${cfg.prompt} with a ${tonePrompts[tone]} tone: ${translated}`, voice);
+
+                    allBuffers.push(audio.buffer);
+                    sRate = audio.sampleRate;
+                    if (i < langs.length - 1) allBuffers.push(new Int16Array(sRate * pauseTime));
+                }
+
+                const finalPcm = new Int16Array(allBuffers.reduce((a, b) => a + b.length, 0));
+                let offset = 0;
+                for (const b of allBuffers) { finalPcm.set(b, offset); offset += b.length; }
+
+                currentAudioBlob = pcmToWav(finalPcm, sRate);
+                dom.audioPlayer.src = URL.createObjectURL(currentAudioBlob);
+                dom.realLength.innerText = `${(finalPcm.length / sRate).toFixed(1)}s`;
+                dom.resultPanel.classList.remove('hidden');
+
+                saveToHistory({
+                    id: Date.now(),
+                    text: textInput.substring(0, 30) + (textInput.length > 30 ? '...' : ''),
+                    duration: (finalPcm.length / sRate).toFixed(1),
+                    labels: langs.map(l => voiceConfig[l].label).join(', '),
+                    blob: currentAudioBlob
+                });
+
+            } catch (err) {
+                showToast(`Error: ${err.message}`);
+            } finally {
+                dom.generateBtn.disabled = false;
+                dom.btnLoading.classList.add('hidden');
+                dom.btnText.innerText = 'Generar locución';
+            }
+        };
+
+        async function translate(text, target) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelTrValue}:generateContent?key=${apiKeyValue}`;
+            const payload = { contents: [{ parts: [{ text: `Translate to ${target}. Output only translated text: "${text}"` }] }] };
+            const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const d = await r.json();
+            return d.candidates[0].content.parts[0].text.trim();
+        }
+
+        async function tts(text, voice, retry = 0) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelTtsValue}:generateContent?key=${apiKeyValue}`;
+            const payload = {
+                contents: [{ parts: [{ text: text }] }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } }
+                }
+            };
+
+            const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!r.ok) {
+                if (r.status === 429 && retry < 3) { await new Promise(res => setTimeout(res, 2000)); return tts(text, voice, retry + 1); }
+                throw new Error("Fallo TTS.");
+            }
+            const d = await r.json();
+            const part = d.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+            if (!part) throw new Error("Sin audio.");
+
+            const sr = parseInt(part.inlineData.mimeType.match(/rate=(\d+)/)?.[1] || 24000);
+            const binary = atob(part.inlineData.data);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            return { buffer: new Int16Array(bytes.buffer), sampleRate: sr };
+        }
+
+        // --- Utils ---
+
+        dom.btnDeleteConfig.onclick = () => { safeStorage.clear(); location.reload(); };
+        dom.locutionText.oninput = validate;
+        dom.langList.onchange = validate;
+        dom.pauseSelect.onchange = validate;
+        
+        dom.alertBox.onclick = () => {
+            if (alertTimeout) clearTimeout(alertTimeout);
+            dom.alertBox.classList.remove('opacity-100', 'translate-y-0');
+            dom.alertBox.classList.add('opacity-0', 'translate-y-20');
+        };
+
+        async function saveToHistory(item) {
+            const base64 = await new Promise(res => { const r = new FileReader(); r.onloadend = () => res(r.result); r.readAsDataURL(item.blob); });
+            historyStore.unshift({ ...item, blob: base64 });
+            if (historyStore.length > 3) historyStore.pop();
+            const success = safeStorage.set(HISTORY_KEY, JSON.stringify(historyStore));
+            if (!success) showToast('Aviso: Almacenamiento local no disponible.', 'bg-amber-600');
+            renderHistory();
+        }
+
+        function renderHistory() {
+            if (!dom.historyContainer) return;
+            if (historyStore.length === 0) { dom.historyContainer.innerHTML = '<div class="text-center py-8 text-slate-400 text-[11px] italic">No hay audios guardados</div>'; return; }
+            dom.historyContainer.innerHTML = historyStore.map(h => `
+                <div class="history-card bg-white p-3 rounded-xl border border-slate-200 shadow-sm relative group animate-in fade-in">
+                    <button onclick="deleteHItem(${h.id})" class="delete-btn opacity-0 absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-all shadow-md"><svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg></button>
+                    <p class="text-[10px] font-bold text-slate-800 line-clamp-1 italic">"${h.text}"</p>
+                    <div class="flex gap-1 mt-1"><span class="text-[8px] px-1 bg-slate-100 text-slate-500 rounded font-bold">${h.labels}</span><span class="text-[8px] px-1 bg-blue-50 text-blue-600 rounded font-bold">${h.duration}s</span></div>
+                    <div class="flex gap-1.5 mt-2">
+                        <button onclick="playHItem(${h.id})" class="flex-1 py-1 bg-slate-100 hover:bg-blue-600 hover:text-white rounded-lg text-[9px] font-bold transition-all uppercase">Reproducir</button>
+                        <button onclick="dlHItem(${h.id})" class="p-1.5 bg-slate-50 text-slate-400 rounded-lg hover:bg-slate-200 transition-colors"><svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg></button>
+                    </div>
+                </div>`).join('');
+        }
+
+        window.deleteHItem = (id) => { historyStore = historyStore.filter(h => h.id !== id); safeStorage.set(HISTORY_KEY, JSON.stringify(historyStore)); renderHistory(); };
+        window.playHItem = (id) => { const h = historyStore.find(x => x.id === id); if (h) { dom.audioPlayer.src = h.blob; dom.audioPlayer.play(); showToast('Reproduciendo...'); } };
+        window.dlHItem = (id) => { const h = historyStore.find(x => x.id === id); if (h) { const a = document.createElement('a'); a.href = h.blob; a.download = `historial_${id}.wav`; a.click(); } };
+
+        function pcmToWav(samples, sampleRate) {
+            const buffer = new ArrayBuffer(44 + samples.length * 2);
+            const view = new DataView(buffer);
+            const writeStr = (off, s) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+            writeStr(0, 'RIFF'); view.setUint32(4, 32 + samples.length * 2, true); writeStr(8, 'WAVE'); writeStr(12, 'fmt ');
+            view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+            writeStr(36, 'data'); view.setUint32(40, samples.length * 2, true);
+            for (let i = 0; i < samples.length; i++) view.setInt16(44 + i * 2, samples[i], true);
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        function showToast(msg, color = 'bg-slate-800') {
+            if(alertTimeout) clearTimeout(alertTimeout);
+            dom.alertMsg.innerText = msg;
+            
+            // Eliminar clases previas de visibilidad y color
+            dom.alertBox.classList.remove('opacity-0', 'translate-y-20', 'bg-slate-800', 'bg-amber-600', 'bg-green-600', 'bg-red-600');
+            
+            // Mostrar con el nuevo color
+            dom.alertBox.classList.add(color, 'opacity-100', 'translate-y-0');
+            
+            alertTimeout = setTimeout(() => {
+                dom.alertBox.classList.remove('opacity-100', 'translate-y-0');
+                dom.alertBox.classList.add('opacity-0', 'translate-y-20');
+            }, 5000);
+        }
+
+        dom.downloadBtn.onclick = () => { if (currentAudioBlob) { const a = document.createElement('a'); a.href = URL.createObjectURL(currentAudioBlob); a.download = `locucion_${Date.now()}.wav`; a.click(); } };
+
+        initUI();
+    </script>
+</body>
+</html>
