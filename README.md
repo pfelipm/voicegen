@@ -33,6 +33,13 @@ A diferencia de otros despliegues similares que suelo realizar en Google Sites, 
 
 ![VoiceGen Pro Settings](https://raw.githubusercontent.com/pfelipm/voicegen/main/assets/captura-ajustes.png)
 
+## 🔒 Privacidad y seguridad
+
+VoiceGen Pro es una aplicación cliente puro (frontend-only). Esto significa que:
+- Tu clave de API se almacena únicamente en el navegador de tu dispositivo (`localStorage`).
+- Las peticiones para traducir y generar audio se realizan directamente desde tu navegador a los servidores de Google Gemini.
+- **Ningún dato, texto o clave es interceptado ni almacenado por servidores de terceros.**
+
 ## 🤝 Créditos y autoría
 
 Este proyecto ha sido creado y es mantenido por **Pablo Felip** ([LinkedIn](https://www.linkedin.com/in/pfelipm/) | [GitHub](https://github.com/pfelipm)).
