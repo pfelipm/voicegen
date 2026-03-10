@@ -719,7 +719,14 @@
                     blob: currentAudioBlob
                 });
 
+                // Validación silenciosa: si la generación fue un éxito, los ajustes son operativos
+                updateConfigStatus('verified', true);
+
             } catch (err) {
+                // Solo marcamos error en los ajustes si es un fallo de autenticación claro
+                const isAuthError = err.message.includes('401') || err.message.includes('403') || err.message.includes('API_KEY_INVALID');
+                if (isAuthError) updateConfigStatus('error', true);
+                
                 showToast('Error al generar la locución.', 'bg-red-600', err.message);
             } finally {
                 dom.generateBtn.disabled = false;
