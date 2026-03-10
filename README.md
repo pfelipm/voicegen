@@ -6,7 +6,7 @@ Accede a la aplicación en: 👉 [**voicegen.pablofelip.online**](https://voiceg
 
 Originalmente creado para automatizar los mensajes del contestador de un centro educativo durante periodos de vacaciones, su versatilidad lo hace ideal para centralitas, vídeos corporativos, material educativo y cualquier proyecto que requiera una voz profesional en múltiples idiomas.
 
-![VoiceGen Pro Screenshot](https://raw.githubusercontent.com/pfelipm/voicegen/main/assets/captura-iu-voicegenpro.png)
+![VoiceGen Pro Screenshot](https://raw.githubusercontent.com/pfelipm/voicegen/main/assets/captura-iu.png)
 
 ## 🚀 Características principales
 
