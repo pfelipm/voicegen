@@ -579,6 +579,9 @@
 
             if (!tempKey || !tempTr || !tempTts) return showToast('Completa todos los campos.', 'bg-amber-600');
 
+            // Solo marcar como pendiente si ha habido cambios reales
+            const hasChanges = tempKey !== apiKeyValue || tempTr !== modelTrValue || tempTts !== modelTtsValue;
+
             apiKeyValue = tempKey;
             modelTrValue = tempTr;
             modelTtsValue = tempTts;
@@ -586,10 +589,11 @@
             safeStorage.set(API_STORAGE, apiKeyValue);
             safeStorage.set(MODEL_TR_STORAGE, modelTrValue);
             safeStorage.set(MODEL_TTS_STORAGE, modelTtsValue);
-            updateConfigStatus('pending', true);
+            
+            if (hasChanges) updateConfigStatus('pending', true);
 
             dom.configPanel.classList.add('hidden');
-            showToast('Ajustes guardados (sin validar).', 'bg-green-600');
+            showToast('Configuración actualizada.', 'bg-green-600');
             validate();
         };
 
@@ -620,7 +624,7 @@
                 updateConfigStatus('verified', true);
 
                 dom.configPanel.classList.add('hidden');
-                showToast('Configuración validada y guardada.', 'bg-green-600');
+                showToast('Configuración actualizada.', 'bg-green-600');
                 validate();
             } catch (err) {
                 updateConfigStatus('error', true);
