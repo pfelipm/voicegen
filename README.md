@@ -15,6 +15,7 @@ Originalmente creado para automatizar los mensajes del contestador de un centro 
 - **Procesamiento de audio:** Genera un único archivo `.wav` combinando todas las locuciones con pausas personalizables entre idiomas.
 - **Historial local:** Almacena los últimos 3 audios generados para su rápida reproducción o descarga.
 - **Modo claro/oscuro:** Sincronización automática con el sistema operativo y cambio manual.
+- **Gestión inteligente de configuración:** Sistema de verificación persistente que detecta automáticamente si la clave de API y los modelos son operativos tras cada uso, diferenciando entre errores de configuración y fallos temporales del servicio.
 - **Resiliencia:** Diseñado con la estrategia "Trae tu propia clave de API" para ser totalmente funcional en hospedajes estáticos como GitHub Pages o Google Sites.
 
 ## 🛠️ Requisitos técnicos
