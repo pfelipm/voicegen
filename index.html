@@ -697,8 +697,9 @@
                     dom.btnText.innerText = `Traduciendo (${cfg.label})...`;
                     const translated = await translate(textInput, cfg.prompt);
 
+                    const genderPrompt = gender === 'female' ? 'female voice' : 'male voice';
                     dom.btnText.innerText = `Locutando (${cfg.label})...`;
-                    const audio = await tts(`Say in ${cfg.prompt} with a ${tonePrompts[tone]} tone: ${translated}`, voice);
+                    const audio = await tts(`Say in ${cfg.prompt} using a ${genderPrompt} with a ${tonePrompts[tone]} tone: ${translated}`, voice);
 
                     allBuffers.push(audio.buffer);
                     sRate = audio.sampleRate;
